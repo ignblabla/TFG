@@ -5,6 +5,7 @@ import Register from "./pages/Register"
 import Home from "./pages/Home"
 import Index from "./pages/Index"
 import NotFound from "./pages/NotFound"
+import AltaHermano from "./pages/AltaHermano"
 import ProtectedRoute from "./components/ProtectedRoute"
 
 function Logout() {
@@ -22,8 +23,9 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/alta-hermano" element={<AltaHermano />} />
         <Route
-          path="/"
+          path="/home"
           element={
             <ProtectedRoute>
               <Home />
