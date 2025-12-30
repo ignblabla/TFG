@@ -110,3 +110,31 @@ nav {
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(157, 0, 224, 0.3);
 }
+
+@media (max-width: 768px) {
+    nav {
+        flex-wrap: wrap;
+        padding: 1rem;
+        justify-content: center;
+    }
+
+    .nav-links {
+        display: none;
+    }
+
+    .nav-buttons {
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+        gap: 5px;
+    }
+
+    .btn-outline, .btn-purple {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+
+    .logo-text h4 {
+        font-size: 1rem;
+    }
+}
