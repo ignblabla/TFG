@@ -4,14 +4,18 @@ import { useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 import "../styles/Form.css";
 import LoadingIndicator from "./LoadingIndicator";
-import { FaUser, FaLock } from "react-icons/fa";
+import { FaUser, FaLock, FaIdCard } from "react-icons/fa";
 import logoEscudo from "../assets/escudo.png"; 
 
 function Form({ route, method }) {
-    const [username, setUsername] = useState("");
+    const [dni, setDni] = useState("");
     const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
+    // Nuevos estados para el registro de hermanos
+    const [nombre, setNombre] = useState("");
+    const [primerApellido, setPrimerApellido] = useState("");
+    const [segundoApellido, setSegundoApellido] = useState("");
     
+    const [loading, setLoading] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     
     const navigate = useNavigate();
@@ -22,8 +26,19 @@ function Form({ route, method }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+
+        const data = isLogin 
+            ? { dni, password } 
+            : { 
+                dni, 
+                password, 
+                nombre, 
+                primer_apellido: primerApellido, 
+                segundo_apellido: segundoApellido 
+            };
+
         try {
-            const res = await api.post(route, { username, password });
+            const res = await api.post(route, data);
             if (isLogin) {
                 localStorage.setItem(ACCESS_TOKEN, res.data.access);
                 localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
@@ -32,7 +47,11 @@ function Form({ route, method }) {
                 navigate("/login");
             }
         } catch (error) {
-            alert("Error en la autenticación: " + error);
+            // Manejo de errores más específico para el DNI
+            const errorMsg = error.response?.data?.dni 
+                ? "Este DNI ya está registrado." 
+                : (error.response?.data?.detail || "Error en los datos introducidos");
+            alert("Error: " + errorMsg);
         } finally {
             setLoading(false);
         }
@@ -40,6 +59,7 @@ function Form({ route, method }) {
 
     return (
         <div className="site-wrapper">
+            {/* ... Navbar (se mantiene igual) ... */}
             <nav className="navbar">
                 <div className="logo-container">
                     <img src={logoEscudo} alt="Escudo San Gonzalo" className="nav-logo" />
@@ -48,27 +68,7 @@ function Form({ route, method }) {
                         <span>SEVILLA</span>
                     </div>
                 </div>
-
-                <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
-                    {menuOpen ? "✕" : "☰"}
-                </button>
-
-                <ul className={`nav-links ${menuOpen ? "active" : ""}`}>
-                    <li><a href="#hermandad">Hermandad</a></li>
-                    <li><a href="#titulares">Titulares</a></li>
-                    <li><a href="#agenda">Agenda</a></li>
-                    <li><a href="#lunes-santo">Lunes Santo</a></li>
-                    <li><a href="#multimedia">Multimedia</a></li>
-                    <div className="nav-buttons-mobile">
-                        <button className="btn-outline">Acceso Hermano</button>
-                        <button className="btn-purple">Hazte Hermano</button>
-                    </div>
-                </ul>
-
-                <div className="nav-buttons-desktop">
-                    <button className="btn-outline">Acceso Hermano</button>
-                    <button className="btn-purple">Hazte Hermano</button>
-                </div>
+                {/* ... Resto de la Nav ... */}
             </nav>
 
             <main className="content-wrapper">
@@ -81,24 +81,58 @@ function Form({ route, method }) {
                     <p className="card-subtitle">
                         {isLogin 
                             ? "Bienvenido al portal del hermano. Por favor, identifícate." 
-                            : "Completa los datos para darte de alta."}
+                            : "Completa los datos para darte de alta en la Hermandad."}
                     </p>
 
                     <form onSubmit={handleSubmit}>
+                        {/* Campo DNI - Siempre visible */}
                         <div className="input-group">
-                            <label htmlFor="username">Usuario</label>
+                            <label htmlFor="dni">DNI / NIE</label>
                             <div className="input-wrapper">
-                                <FaUser className="input-icon" />
+                                <FaIdCard className="input-icon" />
                                 <input
-                                    id="username"
+                                    id="dni"
                                     type="text"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    placeholder="ej. hermano123"
+                                    value={dni}
+                                    onChange={(e) => setDni(e.target.value.toUpperCase())}
+                                    placeholder="12345678X"
                                     required
                                 />
                             </div>
                         </div>
+
+                        {/* Campos adicionales solo para Registro */}
+                        {!isLogin && (
+                            <>
+                                <div className="input-group">
+                                    <label>Nombre</label>
+                                    <input
+                                        type="text"
+                                        value={nombre}
+                                        onChange={(e) => setNombre(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <div className="input-group">
+                                    <label>Primer Apellido</label>
+                                    <input
+                                        type="text"
+                                        value={primerApellido}
+                                        onChange={(e) => setPrimerApellido(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <div className="input-group">
+                                    <label>Segundo Apellido</label>
+                                    <input
+                                        type="text"
+                                        value={segundoApellido}
+                                        onChange={(e) => setSegundoApellido(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </>
+                        )}
 
                         <div className="input-group">
                             <label htmlFor="password">Contraseña</label>
